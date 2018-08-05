@@ -67,7 +67,7 @@ public class Calculator {
 				}
 
 				// Step 6
-				matrix[i][j] = getMinimum(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+				matrix[i][j] = min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
 			}
 		}
 
@@ -76,25 +76,12 @@ public class Calculator {
 	}
 
 	/**
-	 * 获取三者中的最小值，主计算方法使用
 	 *
-	 * @param a 数字a
-	 * @param b 数字b
-	 * @param c 数字c
-	 * @return 三者中的最小值
+	 * @param numbers 要比较的数
+	 * @return 其中的最小值
 	 */
-	private static int getMinimum(int a, int b, int c) {
-		int min = a;
-
-		if (b < min) {
-			min = b;
-		}
-
-		if (c < min) {
-			min = c;
-		}
-
-		return min;
+	private static int min(int... numbers) {
+		return Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
 	}
 
 	/**
