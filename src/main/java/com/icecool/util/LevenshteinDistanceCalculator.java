@@ -1,16 +1,19 @@
-package LevenshteinDistance;
+package com.icecool.util;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-public class Calculator {
+public class LevenshteinDistanceCalculator {
 
 	/**
 	 * 阈值
 	 */
-	private static final int THRESHOLD = 2;
+	private static final int THRESHOLD = 0;
 
 	/**
 	 * 计算Levenshtein Distance主方法
@@ -76,7 +79,6 @@ public class Calculator {
 	}
 
 	/**
-	 *
 	 * @param numbers 要比较的数
 	 * @return 其中的最小值
 	 */
@@ -89,27 +91,31 @@ public class Calculator {
 	 *
 	 * @param sources 原单词数组
 	 * @param targets 词库数组
-	 * @return 对比结果map，key是原单词，value是词库中原单词的形近词set（不包括原单词本身）
+	 * @return 对比结果map
 	 */
-	public static Map<String, Set<String>> getSimilarWords(List<String> sources, List<String> targets) {
+	public static Map<String, Map<Integer, List<String>>> getSimilarWords(List<String> sources, List<String> targets) throws FileNotFoundException, UnsupportedEncodingException {
 		// 如果原单词数组或者词库数组为空则返回空map
 		if (CollectionUtils.isEmpty(sources) || CollectionUtils.isEmpty(targets)) {
 			return new HashMap<>();
 		}
 
-		int sourceWordCount = sources.size(); // 原单词数组数量
-		Map<String, Set<String>> result = new HashMap<>(sourceWordCount); // 形近字结果
+		Map<String, Map<Integer, List<String>>> result = new TreeMap<>(); // 形近字结果
 
 		// 遍历原单词数组
-		for (String source : sources) {
+		for (int i = 0; i < sources.size(); i++) {
+			String source = sources.get(i);
+
 			// 原单词非空校验
 			if (StringUtils.isBlank(source)) {
 				continue;
 			}
 
 			int sLen = source.length(); // source的长度
+			int thresholdDynamic = getThreshold(sLen); // 动态计算阈值
 
-			Set<String> similarWords = new HashSet<>(); // 词库中和source相似的单词
+			System.out.println(i + ":" + source + ":" + sLen);
+
+			Map<Integer, List<String>> similarWordsMap = new TreeMap<>(); // k是L氏距离，v是形近词数组
 
 			// 遍历词库
 			for (String target : targets) {
@@ -118,22 +124,41 @@ public class Calculator {
 					continue;
 				}
 
+				// 如果是同一个单词直接忽略
+				if (source.equals(target)) {
+					continue;
+				}
+
 				int tLen = target.length(); // target的长度
 				// 先对比长度，长度不符合就直接pass了
-				if (Math.abs(sLen - tLen) > THRESHOLD) {
+				if (Math.abs(sLen - tLen) > thresholdDynamic) {
 					continue;
 				}
 
 				int distance = getLevenshteinDistance(source, target); // 计算利文斯顿距离
-				// 小于阈值并且排除source本身
-				if (distance <= THRESHOLD && distance != 0) {
-					similarWords.add(target);
+				// 判断是否小于阈值
+				if (distance <= thresholdDynamic) {
+					List<String> list = MapUtils.getObject(similarWordsMap, distance, new ArrayList<>());
+					list.add(target);
+					similarWordsMap.put(distance, list);
 				}
 			}
 
-			result.put(source, similarWords);
+			if (MapUtils.isNotEmpty(similarWordsMap)) {
+				result.put(source, similarWordsMap);
+			}
 		}
 
 		return result;
+	}
+
+	private static int getThreshold(int len) {
+		if (len >= 1 && len <= 5) {
+			return 1;
+		} else if (len >= 6 && len <= 8) {
+			return 2;
+		} else {
+			return 3;
+		}
 	}
 }
