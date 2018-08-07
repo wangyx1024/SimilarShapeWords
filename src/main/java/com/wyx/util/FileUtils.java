@@ -1,4 +1,4 @@
-package com.icecool.util;
+package com.wyx.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

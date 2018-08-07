@@ -1,4 +1,4 @@
-package com.icecool.util;
+package com.wyx.util;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -96,15 +96,13 @@ public class LevenshteinDistanceCalculator {
 	public static Map<String, Map<Integer, List<String>>> getSimilarWords(List<String> sources, List<String> targets) throws FileNotFoundException, UnsupportedEncodingException {
 		// 如果原单词数组或者词库数组为空则返回空map
 		if (CollectionUtils.isEmpty(sources) || CollectionUtils.isEmpty(targets)) {
-			return new HashMap<>();
+			return new TreeMap<>();
 		}
 
 		Map<String, Map<Integer, List<String>>> result = new TreeMap<>(); // 形近字结果
 
 		// 遍历原单词数组
-		for (int i = 0; i < sources.size(); i++) {
-			String source = sources.get(i);
-
+		for (String source : sources) {
 			// 原单词非空校验
 			if (StringUtils.isBlank(source)) {
 				continue;
@@ -112,8 +110,6 @@ public class LevenshteinDistanceCalculator {
 
 			int sLen = source.length(); // source的长度
 			int thresholdDynamic = getThreshold(sLen); // 动态计算阈值
-
-			System.out.println(i + ":" + source + ":" + sLen);
 
 			Map<Integer, List<String>> similarWordsMap = new TreeMap<>(); // k是L氏距离，v是形近词数组
 
